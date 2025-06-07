@@ -1,6 +1,6 @@
-# rb-bookmark-service
+# rb-orchestrator
 
-This is a sample template for rb-bookmark-service - Below is a brief explanation of what we have generated for you:
+This is a sample template for rb-orchestrator - Below is a brief explanation of what we have generated for you:
 
 ```bash
 .
