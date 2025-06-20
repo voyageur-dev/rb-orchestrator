@@ -14,21 +14,25 @@ import (
 )
 
 const (
-	updateMetadataPath = "PUT /rb/orchestrator/metadata"
+	updateMetadataPath     = "PUT /rb/orchestrator/metadata"
+	batchFetchAnalysisPath = "POST /rb/orchestrator/analysis"
 )
 
 var (
 	questionServiceArn string
 	metadataServiceArn string
+	askServiceArn      string
 
 	lambdaClient    *lambdaSDK.Client
 	questionService *services.QuestionService
 	metadataService *services.MetadataService
+	askService      *services.AskService
 )
 
 func init() {
 	questionServiceArn = os.Getenv("QUESTION_SERVICE_ARN")
 	metadataServiceArn = os.Getenv("METADATA_SERVICE_ARN")
+	askServiceArn = os.Getenv("ASK_SERVICE_ARN")
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
@@ -44,6 +48,10 @@ func init() {
 		LambdaClient:       lambdaClient,
 		MetadataServiceArn: metadataServiceArn,
 	}
+	askService = &services.AskService{
+		LambdaClient:  lambdaClient,
+		AskServiceArn: askServiceArn,
+	}
 }
 
 func handler(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
@@ -53,6 +61,8 @@ func handler(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPRes
 		switch path {
 		case updateMetadataPath:
 			return updateMetadata()
+		case batchFetchAnalysisPath:
+			return batchFetchAnalysis(request)
 		default:
 			return events.APIGatewayV2HTTPResponse{
 				Body:       "Path Not Found",
@@ -110,6 +120,13 @@ func updateMetadata() (events.APIGatewayV2HTTPResponse, error) {
 	}
 
 	fmt.Println("Update Metadata End")
+
+	return events.APIGatewayV2HTTPResponse{
+		StatusCode: http.StatusOK,
+	}, nil
+}
+
+func batchFetchAnalysis(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 
 	return events.APIGatewayV2HTTPResponse{
 		StatusCode: http.StatusOK,
